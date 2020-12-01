@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "flat-list",
-    "slug": "flat-list",
+    "name": "reactnative-flatlist-dragdrop",
+    "slug": "reactnative-flatlist-dragdrop",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +27,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "Drag and drop implementation using React Native's PanResponder",
+    "githubUrl": "https://github.com/jonathanpperry/reactnative-flatlist-panresponder"
   }
 }
