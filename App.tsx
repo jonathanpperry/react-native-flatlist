@@ -1,10 +1,12 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { createRef } from "react";
 import {
   Animated,
+  Button,
   FlatList,
   PanResponder,
   PanResponderInstance,
+  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -59,6 +61,8 @@ export default class App extends React.Component {
   rowHeight = 0;
   currentIndex = -1;
   active = false;
+  flatList = createRef<FlatList<any>>();
+  flatListHeight = 0;
 
   constructor(props) {
     super(props);
@@ -71,7 +75,6 @@ export default class App extends React.Component {
       onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
 
       onPanResponderGrant: (evt, gestureState) => {
-        console.log(gestureState.y0);
         this.currentIndex = this.yToIndex(gestureState.y0);
         this.currentY = gestureState.y0;
         Animated.event([{ y: this.point.y }])({
@@ -112,12 +115,24 @@ export default class App extends React.Component {
     }
 
     requestAnimationFrame(() => {
+      // Check if we are near the bottom or top
+      if (this.currentY + 300 > this.flatListHeight) {
+        this.flatList.current?.scrollToOffset({
+          offset: this.scrollOffset + 5,
+          animated: false,
+        });
+      } else if (this.currentY < 100) {
+        this.flatList.current?.scrollToOffset({
+          offset: this.scrollOffset - 20,
+          animated: false,
+        });
+      }
       // Check y value, see if we need to re-order
       const newIdx = this.yToIndex(this.currentY);
       if (this.currentIndex != newIdx) {
         this.setState({
           data: immutableMove(this.state.data, this.currentIndex, newIdx),
-          draggingIndex: newIdx
+          draggingIndex: newIdx,
         });
         this.currentIndex = newIdx;
       }
@@ -171,7 +186,7 @@ export default class App extends React.Component {
     );
 
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         {dragging && (
           <Animated.View
             style={{
@@ -187,6 +202,7 @@ export default class App extends React.Component {
           </Animated.View>
         )}
         <FlatList
+          ref={this.flatList}
           scrollEnabled={!dragging}
           style={{ width: "100%" }}
           data={data}
@@ -196,12 +212,13 @@ export default class App extends React.Component {
           }}
           onLayout={(e) => {
             this.flatlistTopOffset = e.nativeEvent.layout.y;
+            this.flatListHeight = e.nativeEvent.layout.height;
           }}
           scrollEventThrottle={16}
           keyExtractor={(item) => "" + item}
         />
         <StatusBar style="auto" />
-      </View>
+      </SafeAreaView>
     );
   }
 }
